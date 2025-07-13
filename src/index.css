@@ -1,0 +1,35 @@
+:root {
+  --primary-color: #00ba9f;
+  --primary-blue: #118ad3;
+  --primary-red: #FF1654;
+  --active-navigate: #02816E;
+  --text-color: #969696;
+}
+body {
+  min-height: 100vh;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style: none;
+  outline: none;
+  border: none;
+}
+
+button {
+  outline: none;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
