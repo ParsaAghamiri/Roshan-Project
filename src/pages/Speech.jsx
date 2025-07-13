@@ -3,6 +3,9 @@ import { LuCloudUpload } from "react-icons/lu";
 import { FiLink } from "react-icons/fi";
 import { RiArrowDownSFill } from "react-icons/ri";
 import { useState } from "react";
+import VoiceRecord from "../components/VoiceRecord";
+import UploadFile from "../components/UploadFile";
+import LinkInput from "../components/LinkInput";
 
 function Speech() {
   const [activeSection, setActiveSection] = useState("voice-record");
@@ -48,9 +51,9 @@ function Speech() {
             </li>
           </ul>
           <div className="content-section">
-            {activeSection === "voice-record" && <div>voice-record section</div>}
-            {activeSection === "upload-file" && <div>upload-file section</div>}
-            {activeSection === "link" && <div>link-input section</div>}
+            {activeSection === "voice-record" && <VoiceRecord />}
+            {activeSection === "upload-file" && <UploadFile />}
+            {activeSection === "link" && <LinkInput />}
           </div>
           <div className="select-speech">
             <span className="selection-desc">زبان گفتار:</span>
