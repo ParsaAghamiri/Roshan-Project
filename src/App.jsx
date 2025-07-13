@@ -1,8 +1,20 @@
+import { CiUser } from "react-icons/ci";
 import "./App.css";
+import SideBar from "./components/SideBar";
+import { RiArrowDownSFill } from "react-icons/ri";
 
 function App() {
   return (
-    <div>start</div>
+    <div className="container">
+      <div className="user-role">
+        <CiUser className="user-icon" />
+        <span className="user-role__text">مهمان</span>
+        <RiArrowDownSFill className="user-arrow-icon" />
+      </div>
+      <div className="sidebar-container">
+        <SideBar />
+      </div>
+    </div>
   );
 }
 
