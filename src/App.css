@@ -96,3 +96,118 @@
   border-radius: 20px;
   cursor: pointer;
 }
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.transform-title {
+  margin-top: 4.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.transform-title__header {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 0.3rem;
+}
+
+.transform-title__text {
+  font-size: 16px;
+  color: var(--text-color);
+  text-align: center;
+  line-height: 125%;
+}
+
+.navigation-section {
+  width: 50%;
+}
+
+.navigation-options {
+  display: flex;
+  justify-content: flex-start;
+  gap: 5px;
+  width: 100%;
+}
+
+.navigation-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-color);
+  font-size: 14px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+}
+
+.voice-record {
+  background-color: var(--primary-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-size: 16px;
+  padding: 0.7rem 1.7rem;
+  cursor: pointer;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.upload-file {
+  background-color: var(--primary-blue);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-size: 16px;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.link {
+  background-color: var(--primary-red);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-size: 16px;
+  padding: 0.8rem 1.6rem;
+  cursor: pointer;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.select-speech {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.selection-desc {
+  color: var(--text-color);
+}
+
+.speech-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--primary-color);
+  width: 6.5rem;
+  height: 2.5rem;
+  border: 2px solid var(--primary-color);
+  border-radius: 20px;
+  cursor: pointer;
+}

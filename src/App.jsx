@@ -2,6 +2,7 @@ import { CiUser } from "react-icons/ci";
 import "./App.css";
 import SideBar from "./components/SideBar";
 import { RiArrowDownSFill } from "react-icons/ri";
+import Speech from "./pages/Speech";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <div className="sidebar-container">
         <SideBar />
       </div>
+        <Speech />
     </div>
   );
 }
