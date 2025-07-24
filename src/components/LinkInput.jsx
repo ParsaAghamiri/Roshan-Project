@@ -9,8 +9,10 @@ function LinkInput() {
         </button>
         <input type="text" placeholder="https://www.example.com" />
       </div>
-      <p className="main-section__text">برای شروع به صحبت، دکمه را فشار دهید</p>
-      <p className="main-section__text">متن پیاده شده آن، در اینجا ظاهر شود</p>
+      <p className="main-section__text">
+        نشانی اینترنتی فایل حاوی گفتار (صوتی/تصویری) را وارد{" "}
+      </p>
+      <p className="main-section__text">و دکمه را فشار دهید</p>
     </div>
   );
 }

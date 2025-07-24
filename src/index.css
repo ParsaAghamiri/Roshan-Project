@@ -1,14 +1,15 @@
 :root {
   --primary-color: #00ba9f;
   --primary-blue: #118ad3;
-  --primary-red: #FF1654;
-  --active-navigate: #02816E;
+  --primary-red: #ff1654;
+  --active-navigate: #02816e;
   --text-color: #969696;
 }
 body {
   min-height: 100vh;
 }
 * {
+  font-family: Vazirmatn, sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -29,7 +30,7 @@ button:disabled {
 }
 
 a {
-  color: inherit;
+  color: var(--primary-blue);
   text-decoration: none;
   cursor: pointer;
 }

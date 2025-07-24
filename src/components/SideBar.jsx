@@ -1,23 +1,39 @@
-import { BsSoundwave } from "react-icons/bs";
-import { PiMicrophone } from "react-icons/pi";
-import { FaRegFolder } from "react-icons/fa";
+import { NavLink } from "react-router-dom";
 
 function SideBar() {
   return (
     <div className="sidebar">
       <div className="logo">
-        <BsSoundwave className="logo__icon" />
+        <img
+          src="/Assets/icons/logo-icon.svg"
+          alt="logo"
+          className="logo__icon"
+          width="32"
+          height="32"
+        />
         <span className="logo__text">آوا</span>
       </div>
       <div className="sidebar-navigate">
-        <button className="navigate-btn active">
-          <PiMicrophone className="navigate-btn__icon" />
+        <NavLink to="/speech" className="navigate-btn">
+          <img
+            src="/Assets/icons/speech icon.svg"
+            alt="speech"
+            className="navigate-btn__icon"
+            width="22"
+            height="25"
+          />
           <span className="navigate-btn__text">تبدیل گفتار</span>
-        </button>
-        <button className="navigate-btn archive">
-          <FaRegFolder className="navigate-btn__icon" />
+        </NavLink>
+        <NavLink to="/archive" className="navigate-btn archive">
+          <img
+            src="/Assets/icons/archive icon.svg"
+            alt="speech"
+            className="navigate-btn__icon"
+            width="22"
+            height="25"
+          />
           <span className="navigate-btn__text">آرشیو</span>
-        </button>
+        </NavLink>
       </div>
     </div>
   );
