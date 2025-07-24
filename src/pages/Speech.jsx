@@ -2,11 +2,13 @@ import { PiMicrophone } from "react-icons/pi";
 import { LuCloudUpload } from "react-icons/lu";
 import { FiLink } from "react-icons/fi";
 import { RiArrowDownSFill } from "react-icons/ri";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useOutletContext } from "react-router-dom";
 import { useState } from "react";
 
 function Speech() {
   const [selectOpen, setSelectOpen] = useState(false);
+
+  const context = useOutletContext();
 
   function handleSelectOpen() {
     setSelectOpen(!selectOpen);
@@ -18,7 +20,7 @@ function Speech() {
         <div className="transform-title">
           <h1 className="transform-title__header">تبدیل گفتار به متن</h1>
           <p className="transform-title__text">
-            آوا با استفاده از هزاران ساعت گفتار با صدای افراد مختلف، <br />
+            آوا با استفاده از هزاران ساعت گفتار با صدای افراد مختلف, <br />
             زبان فارسی را یاد گرفته است و می‌تواند متن صحبت‌ها را بنویسد.
           </p>
         </div>
@@ -60,7 +62,7 @@ function Speech() {
             </li>
           </ul>
           <div className="content-section">
-            <Outlet />
+            <Outlet context={context} />
           </div>
           <div className="select-speech">
             <span className="selection-desc">زبان گفتار:</span>

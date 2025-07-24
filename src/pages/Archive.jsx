@@ -1,3 +1,5 @@
+import React, { useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { BiMicrophone } from "react-icons/bi";
 import { FiLink, FiUploadCloud } from "react-icons/fi";
 import { BsDownload } from "react-icons/bs";
@@ -6,7 +8,38 @@ import { IoTrashOutline } from "react-icons/io5";
 import { AiOutlineFileWord } from "react-icons/ai";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 
+const formatDuration = (totalSeconds) => {
+  if (typeof totalSeconds !== "number" || !isFinite(totalSeconds)) {
+    return "--";
+  }
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  const paddedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+  return `${minutes}:${paddedSeconds}`;
+};
+
 function Archive() {
+  const { archiveItems, handleDeleteItem } = useOutletContext();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = archiveItems.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(archiveItems.length / itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handlePageClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <div className="archive-container">
       <span className="archive-header">آرشیو من</span>
@@ -23,255 +56,126 @@ function Archive() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>
-                <button className="table-icon red">
-                  <FiLink className="link-btn__icon" />
-                </button>
-              </td>
-              <td>
-                <a href="">
-                  https://irsv.upmusics.com/Downloads/Musics/Sirvan%20K...
-                </a>
-              </td>
-              <td>۱۴۰۰-۰۸-۲۱</td>
-              <td>.mp3</td>
-              <td>۴:۲۹</td>
-              <td>
-                <div className="icon-group">
-                  <span className="download-icon">
-                    <BsDownload />
-                  </span>
-                  <span className="word-icon">
-                    <AiOutlineFileWord />
-                  </span>
-                  <span className="copy-icon">
-                    <RxCopy />
-                  </span>
-                  <span className="trash-icon">
-                    <IoTrashOutline />
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <button className="table-icon blue">
-                  <FiUploadCloud className="link-btn__icon" />
-                </button>
-              </td>
-              <td>khaterate To</td>
-              <td>۱۴۰۰-۰۸-۲۰</td>
-              <td>.mp4</td>
-              <td>۴:۲۸</td>
-              <td>
-                <div className="icon-group">
-                  <span className="download-icon">
-                    <BsDownload />
-                  </span>
-                  <span className="word-icon">
-                    <AiOutlineFileWord />
-                  </span>
-                  <span className="copy-icon">
-                    <RxCopy />
-                  </span>
-                  <span className="trash-icon">
-                    <IoTrashOutline />
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <button className="table-icon red">
-                  <FiLink className="link-btn__icon" />
-                </button>
-              </td>
-              <td>
-                <a href="">
-                  https://irsv.upmusics.com/Downloads/Musics/Sirvan%20K...
-                </a>
-              </td>
-              <td>۱۴۰۰-۰۸-۲۰</td>
-              <td>.wav</td>
-              <td>۳:۱۴</td>
-              <td>
-                <div className="icon-group">
-                  <span className="download-icon">
-                    <BsDownload />
-                  </span>
-                  <span className="word-icon">
-                    <AiOutlineFileWord />
-                  </span>
-                  <span className="copy-icon">
-                    <RxCopy />
-                  </span>
-                  <span className="trash-icon">
-                    <IoTrashOutline />
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <button className="table-icon green">
-                  <BiMicrophone className="link-btn__icon" />
-                </button>
-              </td>
-              <td>پادکست رادیو راه - فصل دوم -قسمت ششم- راه سروش</td>
-              <td>۱۴۰۰-۰۸-۱۹</td>
-              <td>.mp3</td>
-              <td>۱:۲۸:۱۸</td>
-              <td>
-                <div className="icon-group">
-                  <span className="download-icon">
-                    <BsDownload />
-                  </span>
-                  <span className="word-icon">
-                    <AiOutlineFileWord />
-                  </span>
-                  <span className="copy-icon">
-                    <RxCopy />
-                  </span>
-                  <span className="trash-icon">
-                    <IoTrashOutline />
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <button className="table-icon red">
-                  <FiLink className="link-btn__icon" />
-                </button>
-              </td>
-              <td>
-                <a href="">
-                  https://irsv.upmusics.com/Downloads/Musics/Sirvan%20K...
-                </a>
-              </td>
-              <td>۱۴۰۰-۰۸-۲۱</td>
-              <td>.mp3</td>
-              <td>۱:۲۸:۱۸</td>
-              <td>
-                <div className="icon-group">
-                  <span className="download-icon">
-                    <BsDownload />
-                  </span>
-                  <span className="word-icon">
-                    <AiOutlineFileWord />
-                  </span>
-                  <span className="copy-icon">
-                    <RxCopy />
-                  </span>
-                  <span className="trash-icon">
-                    <IoTrashOutline />
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <button className="table-icon blue">
-                  <FiUploadCloud className="link-btn__icon" />
-                </button>
-              </td>
-              <td>khaterate To</td>
-              <td>۱۴۰۰-۰۸-۲۰</td>
-              <td>.mp4</td>
-              <td>۴:۲۸</td>
-              <td>
-                <div className="icon-group">
-                  <span className="download-icon">
-                    <BsDownload />
-                  </span>
-                  <span className="word-icon">
-                    <AiOutlineFileWord />
-                  </span>
-                  <span className="copy-icon">
-                    <RxCopy />
-                  </span>
-                  <span className="trash-icon">
-                    <IoTrashOutline />
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <button className="table-icon red">
-                  <FiLink className="link-btn__icon" />
-                </button>
-              </td>
-              <td>
-                <a href="">
-                  https://irsv.upmusics.com/Downloads/Musics/Sirvan%20K ...
-                </a>
-              </td>
-              <td>۱۴۰۰-۰۸-۲۰</td>
-              <td>.wav</td>
-              <td>۳:۱۴</td>
-              <td>
-                <div className="icon-group">
-                  <span className="download-icon">
-                    <BsDownload />
-                  </span>
-                  <span className="word-icon">
-                    <AiOutlineFileWord />
-                  </span>
-                  <span className="copy-icon">
-                    <RxCopy />
-                  </span>
-                  <span className="trash-icon">
-                    <IoTrashOutline />
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <button className="table-icon green">
-                  <BiMicrophone className="link-btn__icon" />
-                </button>
-              </td>
-              <td>پادکست رادیو راه - فصل دوم -قسمت ششم- راه سروش</td>
-              <td>۱۴۰۰-۰۸-۱۹</td>
-              <td>.mp3</td>
-              <td>۱:۲۸:۱۸</td>
-              <td>
-                <div className="icon-group">
-                  <span className="download-icon">
-                    <BsDownload />
-                  </span>
-                  <span className="word-icon">
-                    <AiOutlineFileWord />
-                  </span>
-                  <span className="copy-icon">
-                    <RxCopy />
-                  </span>
-                  <span className="trash-icon">
-                    <IoTrashOutline />
-                  </span>
-                </div>
-              </td>
-            </tr>
+            <TableBody
+              items={currentItems}
+              handleDeleteItem={handleDeleteItem}
+            />
           </tbody>
         </table>
       </div>
-      <div className="change-table">
-        <FaChevronRight className="change-table-icon" />
-        <span className="change-table-option">1</span>
-        <span>...</span>
-        <span className="change-table-option">123</span>
-        <span className="change-table-option selected-option">124</span>
-        <span className="change-table-option">125</span>
-        <span className="change-table-option">126</span>
-        <span>...</span>
-        <span className="change-table-option">356</span>
-        <FaChevronLeft className="change-table-icon" />
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        handlePrevPage={handlePrevPage}
+        handleNextPage={handleNextPage}
+        handlePageClick={handlePageClick}
+      />
     </div>
   );
 }
 
 export default Archive;
+
+function TableBody({ items, handleDeleteItem }) {
+  if (items.length === 0) {
+    return (
+      <tr>
+        <td colSpan="6">No items have been added yet.</td>
+      </tr>
+    );
+  }
+
+  return items.map((item) => (
+    <tr key={item.id}>
+      <td>
+        <button
+          className={`table-icon ${
+            item.source_type === "LINK"
+              ? "red"
+              : item.source_type === "UPLOAD"
+              ? "blue"
+              : "green"
+          }`}
+        >
+          {item.source_type === "LINK" && <FiLink />}
+          {item.source_type === "UPLOAD" && <FiUploadCloud />}
+          {item.source_type === "RECORD" && <BiMicrophone />}
+        </button>
+      </td>
+      <td className="truncate-text" title={item.file_name}>
+        {item.source_type === "LINK" ? (
+          <a href={item.file_name} target="_blank" rel="noopener noreferrer">
+            {item.file_name}
+          </a>
+        ) : (
+          item.file_name
+        )}
+      </td>
+      <td>{new Date(item.created_at).toLocaleDateString("fa-IR")}</td>
+      <td>{item.file_type || ".---"}</td>
+      <td>{formatDuration(item.duration)}</td>
+      <td>
+        <div className="icon-group">
+          <span className="download-icon">
+            <BsDownload />
+          </span>
+          <span className="word-icon">
+            <AiOutlineFileWord />
+          </span>
+          <span className="copy-icon">
+            <RxCopy />
+          </span>
+          <span
+            onClick={() => handleDeleteItem(item.id)}
+            className="trash-icon"
+          >
+            <IoTrashOutline />
+          </span>
+        </div>
+      </td>
+    </tr>
+  ));
+}
+
+function Pagination({
+  currentPage,
+  totalPages,
+  handlePrevPage,
+  handleNextPage,
+  handlePageClick,
+}) {
+  const pageNumbers = [];
+  for (let i = 1; i <= Math.max(1, totalPages); i++) {
+    pageNumbers.push(i);
+  }
+
+  return (
+    <div className="change-table">
+      <button
+        onClick={handlePrevPage}
+        disabled={currentPage === 1}
+        className="change-table-icon"
+      >
+        <FaChevronRight />
+      </button>
+      {pageNumbers.map((number) => (
+        <span
+          key={number}
+          onClick={() => handlePageClick(number)}
+          className={`change-table-option ${
+            currentPage === number ? "selected-option" : ""
+          }`}
+        >
+          {number}
+        </span>
+      ))}
+      <button
+        onClick={handleNextPage}
+        disabled={currentPage === totalPages}
+        className="change-table-icon"
+      >
+        <FaChevronLeft />
+      </button>
+    </div>
+  );
+}
