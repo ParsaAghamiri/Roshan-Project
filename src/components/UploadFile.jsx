@@ -1,94 +1,98 @@
 import { useState, useRef } from "react";
-import { useOutletContext } from "react-router-dom";
-import { LuCloudUpload } from "react-icons/lu";
 import toast from "react-hot-toast";
+import { LuCloudUpload } from "react-icons/lu";
+import { FiLoader } from "react-icons/fi";
+import { transcribeAudioFile } from "../services/api";
+import Response from "./Response";
 
 function UploadFile() {
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
-  const [isReading, setIsReading] = useState(false);
-
-  const { handleAddItemToArchive } = useOutletContext();
+  const [transcript, setTranscript] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleButtonClick = () => {
+    setError(null);
     fileInputRef.current.click();
   };
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
-    setError(null);
-    setSelectedFile(file);
-    setIsReading(true);
+    setIsProcessing(true);
 
-    const mediaElement = document.createElement(
-      file.type.startsWith("audio") ? "audio" : "video"
-    );
-    mediaElement.src = URL.createObjectURL(file);
+    const formData = new FormData();
+    formData.append("media", file);
 
-    mediaElement.onloadedmetadata = () => {
-      const fileExtension = "." + file.name.split(".").pop();
+    try {
+      const response = await transcribeAudioFile(formData);
+      setTranscript(response.data[0]);
+      toast.success("فایل با موفقیت پیاده‌سازی شد!");
+    } catch (err) {
+      console.error("Error uploading file:", err);
+      toast.error("بارگذاری فایل با خطا مواجه شد.");
+    } finally {
+      setIsProcessing(false);
+      event.target.value = null;
+    }
+  };
 
-      handleAddItemToArchive({
-        source_type: "UPLOAD",
-        file_name: file.name,
-        file_type: fileExtension,
-        duration: mediaElement.duration,
-      });
-
-      setIsReading(false);
-      toast.success("فایل با موفقیت به آرشیو اضافه شد!");
-      setSelectedFile(null);
-      URL.revokeObjectURL(mediaElement.src);
-    };
-
-    mediaElement.onerror = () => {
-      setError("فایل انتخاب شده معتبر نیست.");
-      setIsReading(false);
-      setSelectedFile(null);
-    };
+  const handleStartOver = () => {
+    setTranscript(null);
   };
 
   return (
     <div className="main-section" id="upload-file">
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        style={{ display: "none" }}
-        accept="audio/*,video/*"
-      />
-
-      <button
-        onClick={handleButtonClick}
-        disabled={isReading}
-        className="upload-btn"
-      >
-        <LuCloudUpload className="recording-btn__icon" />
-      </button>
-
-      {isReading ? (
-        <p className="main-section__text">در حال پردازش فایل...</p>
+      {transcript ? (
+        <div className="response-wrapper">
+          <Response
+            type={"upload"}
+            result={transcript}
+            onStartOver={handleStartOver}
+          />
+        </div>
       ) : (
         <>
-          <p className="main-section__text">
-            برای بارگذاری فایل گفتاری (صوتی/تصویری)، دکمه را فشار دهید
-          </p>
-          <p className="main-section__text">
-            متن پیاده شده آن، در اینجا ظاهر می شود
-          </p>
-        </>
-      )}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+            accept="audio/*,video/*"
+            disabled={isProcessing}
+          />
+          <button
+            onClick={handleButtonClick}
+            disabled={isProcessing}
+            className="upload-btn"
+          >
+            {isProcessing ? (
+              <FiLoader />
+            ) : (
+              <LuCloudUpload className="recording-btn__icon" />
+            )}
+          </button>
 
-      {error && (
-        <p
-          className="main-section__text"
-          style={{ color: "red", marginTop: "1rem" }}
-        >
-          {error}
-        </p>
+          {isProcessing ? (
+            <p className="main-section__text">در حال ارسال و پردازش فایل...</p>
+          ) : (
+            <p className="main-section__text">
+              برای بارگذاری فایل، دکمه را فشار دهید
+            </p>
+          )}
+
+          {error && (
+            <p
+              className="main-section__text"
+              style={{ color: "red", marginTop: "1rem" }}
+            >
+              {error}
+            </p>
+          )}
+        </>
       )}
     </div>
   );

@@ -1,12 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import toast from "react-hot-toast";
 import { BsTextRight } from "react-icons/bs";
 import { BiTimeFive } from "react-icons/bi";
-import { BsDownload } from "react-icons/bs";
-import { RxCopy } from "react-icons/rx";
-import { FiRefreshCw } from "react-icons/fi";
 
-function Response({ result, onStartOver, type }) {
+function ArchiveResponse({ result }) {
   const [activeTab, setActiveTab] = useState("simple");
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(-1);
   const audioRef = useRef(null);
@@ -108,54 +104,7 @@ function Response({ result, onStartOver, type }) {
     }
   };
 
-  const handleCopy = () => {
-    if (result && result.segments) {
-      const fullText = result.segments.map((segment) => segment.text).join(" ");
-      navigator.clipboard.writeText(fullText);
-      toast.success("متن کپی شد!");
-    }
-  };
-
-  const handleDownload = () => {
-    if (result && result.segments) {
-      let content = "";
-
-      if (activeTab === "simple") {
-        content = result.segments.map((segment) => segment.text).join(" ");
-      } else {
-        content = result.segments
-          .map(
-            (segment) =>
-              `${formatSegmentTime(segment.start)} - ${formatSegmentTime(
-                segment.end
-              )}: ${segment.text}`
-          )
-          .join("\n");
-      }
-
-      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `transcript_${activeTab}_${new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace(/:/g, "-")}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      toast.success("فایل دانلود شد!");
-    } else {
-      toast.error("متنی برای دانلود وجود ندارد!");
-    }
-  };
-
   const getAudioUrl = () => {
-    if (result?.media_url) {
-      return result.media_url;
-    }
     if (result?.url) {
       return result.url;
     }
@@ -165,16 +114,6 @@ function Response({ result, onStartOver, type }) {
     if (result?.file_url) {
       return result.file_url;
     }
-    if (result?.audioUrl) {
-      return result.audioUrl;
-    }
-    if (result?.fileUrl) {
-      return result.fileUrl;
-    }
-    if (result?.source_url) {
-      return result.source_url;
-    }
-
     return null;
   };
 
@@ -203,24 +142,11 @@ function Response({ result, onStartOver, type }) {
             <span>متن زمان‌بندی شده</span>
           </div>
         </div>
-        <div className="response-options">
-          <BsDownload onClick={handleDownload} className="download-icon" />
-          <RxCopy onClick={handleCopy} className="copy-icon" />
-          <button
-            className={`refresh-btn ${
-              type === "link" ? "red" : type === "upload" ? "blue" : "green"
-            }`}
-            onClick={onStartOver}
-          >
-            <FiRefreshCw />
-            <span>شروع دوباره</span>
-          </button>
-        </div>
       </div>
 
       {activeTab === "simple" && (
         <>
-          <div className="response-content-scrollable">
+          <div className="response-content-scrollable archive-scrollable-content">
             {result && result.segments ? (
               <div
                 style={{
@@ -240,7 +166,7 @@ function Response({ result, onStartOver, type }) {
                     style={{
                       cursor: audioUrl ? "pointer" : "default",
                       color: currentSegmentIndex === index ? "#118AD3" : "",
-                      transition: "background-color 0.3s ease",
+                      transition: "color 0.3s ease",
                       display: "inline",
                     }}
                   >
@@ -267,7 +193,7 @@ function Response({ result, onStartOver, type }) {
 
       {activeTab === "timed" && (
         <>
-          <div className="response-content-scrollable">
+          <div className="response-content-scrollable archive-scrollable-content">
             {result && result.segments ? (
               result.segments.map((segment, index) => (
                 <div
@@ -278,7 +204,7 @@ function Response({ result, onStartOver, type }) {
                   onClick={() => handleSegmentClick(segment, index)}
                   style={{
                     cursor: audioUrl ? "pointer" : "default",
-                    transition: "all 0.3s ease",
+                    transition: "background-color 0.3s ease",
                   }}
                 >
                   <div className="time-stamps">
@@ -329,4 +255,4 @@ function Response({ result, onStartOver, type }) {
   );
 }
 
-export default Response;
+export default ArchiveResponse;

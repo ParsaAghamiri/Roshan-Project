@@ -1,45 +1,12 @@
-import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import SideBar from "../components/SideBar";
+import { useState } from "react";
 import { CiUser } from "react-icons/ci";
 import { RiArrowDownSFill } from "react-icons/ri";
 import { RxExit } from "react-icons/rx";
 
 function Layout() {
   const [userRole, setUserRole] = useState(false);
-
-  const [archiveItems, setArchiveItems] = useState(() => {
-    try {
-      const savedItems = localStorage.getItem("archiveItems");
-      return savedItems ? JSON.parse(savedItems) : [];
-    } catch (error) {
-      console.error("Failed to parse archive items from localStorage", error);
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("archiveItems", JSON.stringify(archiveItems));
-    } catch (error) {
-      console.error("Failed to save archive items to localStorage", error);
-    }
-  }, [archiveItems]);
-
-  const handleAddItemToArchive = (newItem) => {
-    const itemWithDetails = {
-      ...newItem,
-      id: Date.now(),
-      created_at: new Date().toISOString(),
-    };
-    setArchiveItems((prevItems) => [itemWithDetails, ...prevItems]);
-  };
-
-  const handleDeleteItem = (itemId) => {
-    setArchiveItems((prevItems) =>
-      prevItems.filter((item) => item.id !== itemId)
-    );
-  };
 
   function handleUserRole() {
     setUserRole(!userRole);
@@ -74,10 +41,7 @@ function Layout() {
       <div className="sidebar-container">
         <SideBar />
       </div>
-
-      <Outlet
-        context={{ archiveItems, handleAddItemToArchive, handleDeleteItem }}
-      />
+      <Outlet />
     </div>
   );
 }

@@ -1,17 +1,21 @@
-import { PiMicrophone, PiStop } from "react-icons/pi";
 import { useState, useRef } from "react";
-import { useOutletContext } from "react-router-dom";
 import toast from "react-hot-toast";
+import { PiMicrophone, PiStop } from "react-icons/pi";
+import { FiLoader } from "react-icons/fi";
+import { transcribeAudioFile } from "../services/api";
+import Response from "./Response";
 
 function VoiceRecord() {
   const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
+  const [transcript, setTranscript] = useState(null);
 
-  const { handleAddItemToArchive } = useOutletContext();
   const mediaRecorderRef = useRef(null);
 
   const handleToggleRecording = async () => {
     setError(null);
+    setTranscript(null);
 
     if (isRecording) {
       mediaRecorderRef.current.stop();
@@ -29,7 +33,8 @@ function VoiceRecord() {
         audioChunks.push(event.data);
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
+        setIsProcessing(true);
         const audioBlob = new Blob(audioChunks, {
           type: mediaRecorder.mimeType,
         });
@@ -37,14 +42,19 @@ function VoiceRecord() {
           .split("/")[1]
           .split(";")[0];
 
-        handleAddItemToArchive({
-          source_type: "RECORD",
-          file_name: "Voice Record",
-          file_type: `.${fileExtension}`,
-          duration: null,
-        });
+        const formData = new FormData();
+        formData.append("media", audioBlob, `recording.${fileExtension}`);
 
-        toast.success('"Voice Record" با موفقیت به آرشیو اضافه شد!');
+        try {
+          const response = await transcribeAudioFile(formData);
+          setTranscript(response.data[0]);
+          toast.success("فایل با موفقیت پیاده‌سازی شد!");
+        } catch (err) {
+          console.error("Error uploading file:", err);
+          toast.error("بارگذاری فایل با خطا مواجه شد.");
+        } finally {
+          setIsProcessing(false);
+        }
 
         stream.getTracks().forEach((track) => track.stop());
       };
@@ -58,39 +68,63 @@ function VoiceRecord() {
     }
   };
 
+  const handleStartOver = () => {
+    setTranscript(null);
+  };
+
   return (
     <div className="main-section">
-      <button
-        onClick={handleToggleRecording}
-        className={`recording-btn ${isRecording ? "is-recording" : ""}`}
-      >
-        {isRecording ? (
-          <PiStop className="recording-btn__icon" />
-        ) : (
-          <PiMicrophone className="recording-btn__icon" />
-        )}
-      </button>
-
-      {isRecording ? (
-        <p className="main-section__text">در حال ضبط صدا...</p>
+      {transcript ? (
+        <div className="response-wrapper">
+          <Response
+            type={"voice"}
+            result={transcript}
+            onStartOver={handleStartOver}
+          />
+        </div>
       ) : (
         <>
-          <p className="main-section__text">
-            برای شروع به صحبت، دکمه را فشار دهید
-          </p>
-          <p className="main-section__text">
-            متن پیاده شده آن، در اینجا ظاهر شود
-          </p>
-        </>
-      )}
+          <button
+            onClick={handleToggleRecording}
+            disabled={isProcessing}
+            className={`recording-btn ${isRecording ? "is-recording" : ""}`}
+          >
+            {isProcessing ? (
+              <FiLoader className="recording-btn__icon" />
+            ) : isRecording ? (
+              <PiStop className="recording-btn__icon" />
+            ) : (
+              <PiMicrophone className="recording-btn__icon" />
+            )}
+          </button>
 
-      {error && (
-        <p
-          className="main-section__text"
-          style={{ color: "red", marginTop: "1rem" }}
-        >
-          {error}
-        </p>
+          {isRecording && (
+            <p className="main-section__text">در حال ضبط صدا...</p>
+          )}
+          {isProcessing && (
+            <p className="main-section__text">در حال ارسال و پردازش...</p>
+          )}
+
+          {!isRecording && !isProcessing && (
+            <>
+              <p className="main-section__text">
+                برای شروع به صحبت، دکمه را فشار دهید
+              </p>
+              <p className="main-section__text">
+                متن پیاده شده آن، در اینجا ظاهر شود
+              </p>
+            </>
+          )}
+
+          {error && (
+            <p
+              className="main-section__text"
+              style={{ color: "red", marginTop: "1rem" }}
+            >
+              {error}
+            </p>
+          )}
+        </>
       )}
     </div>
   );
