@@ -1,21 +1,29 @@
 import { useState, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { PiMicrophone, PiStop } from "react-icons/pi";
 import { FiLoader } from "react-icons/fi";
 import { transcribeAudioFile } from "../services/api";
+import {
+  setTranscript,
+  setProcessing,
+  setError,
+  setType,
+  clearTranscript,
+} from "../store/slices/transcriptSlice";
 import Response from "./Response";
 
 function VoiceRecord() {
+  const dispatch = useDispatch();
+  const { transcript, isProcessing, error } = useSelector(
+    (state) => state.transcript
+  );
   const [isRecording, setIsRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState(null);
-  const [transcript, setTranscript] = useState(null);
 
   const mediaRecorderRef = useRef(null);
 
   const handleToggleRecording = async () => {
-    setError(null);
-    setTranscript(null);
+    dispatch(clearTranscript());
 
     if (isRecording) {
       mediaRecorderRef.current.stop();
@@ -34,7 +42,8 @@ function VoiceRecord() {
       };
 
       mediaRecorder.onstop = async () => {
-        setIsProcessing(true);
+        dispatch(setProcessing(true));
+        dispatch(setType("voice"));
         const audioBlob = new Blob(audioChunks, {
           type: mediaRecorder.mimeType,
         });
@@ -47,13 +56,13 @@ function VoiceRecord() {
 
         try {
           const response = await transcribeAudioFile(formData);
-          setTranscript(response.data[0]);
+          dispatch(setTranscript(response.data[0]));
           toast.success("فایل با موفقیت پیاده‌سازی شد!");
         } catch (err) {
           console.error("Error uploading file:", err);
           toast.error("بارگذاری فایل با خطا مواجه شد.");
         } finally {
-          setIsProcessing(false);
+          dispatch(setProcessing(false));
         }
 
         stream.getTracks().forEach((track) => track.stop());
@@ -63,24 +72,20 @@ function VoiceRecord() {
       mediaRecorderRef.current = mediaRecorder;
     } catch (err) {
       console.error("Error accessing microphone:", err);
-      setError("دسترسی به میکروفون امکان‌پذیر نیست.");
+      toast.error("دسترسی به میکروفون امکان پذیر نیست!");
       setIsRecording(false);
     }
   };
 
   const handleStartOver = () => {
-    setTranscript(null);
+    dispatch(clearTranscript());
   };
 
   return (
     <div className="main-section">
       {transcript ? (
         <div className="response-wrapper">
-          <Response
-            type={"voice"}
-            result={transcript}
-            onStartOver={handleStartOver}
-          />
+          <Response onStartOver={handleStartOver} />
         </div>
       ) : (
         <>

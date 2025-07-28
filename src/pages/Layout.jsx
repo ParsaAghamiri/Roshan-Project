@@ -1,15 +1,17 @@
 import { Outlet } from "react-router-dom";
 import SideBar from "../components/SideBar";
-import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleUserRole } from "../store/slices/uiSlice";
 import { CiUser } from "react-icons/ci";
 import { RiArrowDownSFill } from "react-icons/ri";
 import { RxExit } from "react-icons/rx";
 
 function Layout() {
-  const [userRole, setUserRole] = useState(false);
+  const dispatch = useDispatch();
+  const userRole = useSelector((state) => state.ui.userRole);
 
   function handleUserRole() {
-    setUserRole(!userRole);
+    dispatch(toggleUserRole());
   }
 
   return (
