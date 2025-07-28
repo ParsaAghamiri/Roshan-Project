@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { BsTextRight } from "react-icons/bs";
 import { BiTimeFive } from "react-icons/bi";
 
-function ArchiveResponse({ result }) {
+function ArchiveResponse({ result, type }) {
   const [activeTab, setActiveTab] = useState("simple");
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(-1);
   const audioRef = useRef(null);
@@ -160,12 +160,13 @@ function ArchiveResponse({ result }) {
                   <span
                     key={index}
                     className={
-                      currentSegmentIndex === index ? "highlighted-text" : ""
+                      currentSegmentIndex === index
+                        ? `highlighted-text-${type}`
+                        : ""
                     }
                     onClick={() => handleSegmentClick(segment, index)}
                     style={{
                       cursor: audioUrl ? "pointer" : "default",
-                      color: currentSegmentIndex === index ? "#118AD3" : "",
                       transition: "color 0.3s ease",
                       display: "inline",
                     }}

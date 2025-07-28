@@ -1,27 +1,18 @@
-import { useRef } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { LuCloudUpload } from "react-icons/lu";
 import { FiLoader } from "react-icons/fi";
 import { transcribeAudioFile } from "../services/api";
-import {
-  setTranscript,
-  setProcessing,
-  setError,
-  setType,
-  clearTranscript,
-} from "../store/slices/transcriptSlice";
 import Response from "./Response";
 
 function UploadFile() {
-  const dispatch = useDispatch();
-  const { transcript, isProcessing, error } = useSelector(
-    (state) => state.transcript
-  );
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [transcript, setTranscript] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleButtonClick = () => {
-    dispatch(setError(null));
+    setError(null);
     fileInputRef.current.click();
   };
 
@@ -31,34 +22,37 @@ function UploadFile() {
       return;
     }
 
-    dispatch(setProcessing(true));
-    dispatch(setType("upload"));
+    setIsProcessing(true);
 
     const formData = new FormData();
     formData.append("media", file);
 
     try {
       const response = await transcribeAudioFile(formData);
-      dispatch(setTranscript(response.data[0]));
+      setTranscript(response.data[0]);
       toast.success("فایل با موفقیت پیاده‌سازی شد!");
     } catch (err) {
       console.error("Error uploading file:", err);
       toast.error("بارگذاری فایل با خطا مواجه شد.");
     } finally {
-      dispatch(setProcessing(false));
+      setIsProcessing(false);
       event.target.value = null;
     }
   };
 
   const handleStartOver = () => {
-    dispatch(clearTranscript());
+    setTranscript(null);
   };
 
   return (
     <div className="main-section" id="upload-file">
       {transcript ? (
         <div className="response-wrapper">
-          <Response onStartOver={handleStartOver} uploadType="upload" />
+          <Response
+            type={"upload"}
+            result={transcript}
+            onStartOver={handleStartOver}
+          />
         </div>
       ) : (
         <>

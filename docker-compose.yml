@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  roshan-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    container_name: roshan-app-dev
+    restart: unless-stopped

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import {
-  getRequests,
-  deleteRequest,
-  getRequestsFromUrl,
-} from "../services/api";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchArchive, deleteArchiveItem } from "../features/archiveSlice";
 import { BiMicrophone } from "react-icons/bi";
 import { FiLink, FiUploadCloud } from "react-icons/fi";
 import { BsDownload } from "react-icons/bs";
@@ -13,6 +10,32 @@ import { IoTrashOutline } from "react-icons/io5";
 import { AiOutlineFileWord } from "react-icons/ai";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import ArchiveResponse from "../components/ArchiveResponse";
+
+const toPersianNumbers = (str) => {
+  if (str === null || str === undefined) return "";
+  const persian = {
+    0: "۰",
+    1: "۱",
+    2: "۲",
+    3: "۳",
+    4: "۴",
+    5: "۵",
+    6: "۶",
+    7: "۷",
+    8: "۸",
+    9: "۹",
+  };
+  return str.toString().replace(/[0-9]/g, (match) => persian[match]);
+};
+
+const formatBytes = (bytes, decimals = 2) => {
+  if (!+bytes) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+};
 
 const formatDuration = (durationString) => {
   if (!durationString || typeof durationString !== "string") return "--";
@@ -26,7 +49,8 @@ const formatDuration = (durationString) => {
     const displaySeconds = Math.floor(totalSeconds % 60);
     const paddedSeconds =
       displaySeconds < 10 ? `0${displaySeconds}` : displaySeconds;
-    return `${displayMinutes}:${paddedSeconds}`;
+    const result = `${displayMinutes}:${paddedSeconds}`;
+    return toPersianNumbers(result);
   } catch (e) {
     return "--";
   }
@@ -34,66 +58,48 @@ const formatDuration = (durationString) => {
 
 const getIconInfo = (item) => {
   if (item.url && !item.url.includes("harf.roshan-ai.ir")) {
-    return { Icon: FiLink, color: "red" };
+    return { Icon: FiLink, color: "red", type: "link" };
   }
   if (item.filename && item.filename.includes("-recording.")) {
-    return { Icon: BiMicrophone, color: "green" };
+    return { Icon: BiMicrophone, color: "green", type: "voice" };
   }
-  return { Icon: FiUploadCloud, color: "blue" };
+  return { Icon: FiUploadCloud, color: "blue", type: "upload" };
 };
 
 const getPaginationRange = (totalPages, currentPage) => {
   const siblingCount = 1;
   const totalPageNumbers = siblingCount + 5;
-
   if (totalPageNumbers >= totalPages) {
-    const range = [];
-    for (let i = 1; i <= totalPages; i++) {
-      range.push(i);
-    }
-    return range;
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
-
   const leftSiblingIndex = Math.max(currentPage - siblingCount, 1);
   const rightSiblingIndex = Math.min(currentPage + siblingCount, totalPages);
-
   const shouldShowLeftDots = leftSiblingIndex > 2;
   const shouldShowRightDots = rightSiblingIndex < totalPages - 2;
-
   const firstPageIndex = 1;
   const lastPageIndex = totalPages;
 
   if (!shouldShowLeftDots && shouldShowRightDots) {
     let leftItemCount = 3 + 2 * siblingCount;
-    const range = [];
-    for (let i = 1; i <= leftItemCount; i++) {
-      range.push(i);
-    }
-    return [...range, "...", totalPages];
+    let leftRange = Array.from({ length: leftItemCount }, (_, i) => i + 1);
+    return [...leftRange, "...", totalPages];
   }
-
   if (shouldShowLeftDots && !shouldShowRightDots) {
     let rightItemCount = 3 + 2 * siblingCount;
-    const range = [];
-    for (let i = totalPages - rightItemCount + 1; i <= totalPages; i++) {
-      range.push(i);
-    }
-    return [firstPageIndex, "...", ...range];
+    let rightRange = Array.from(
+      { length: rightItemCount },
+      (_, i) => totalPages - rightItemCount + 1 + i
+    );
+    return [firstPageIndex, "...", ...rightRange];
   }
-
   if (shouldShowLeftDots && shouldShowRightDots) {
-    const range = [];
-    for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) {
-      range.push(i);
-    }
-    return [firstPageIndex, "...", ...range, "...", lastPageIndex];
+    let middleRange = Array.from(
+      { length: rightSiblingIndex - leftSiblingIndex + 1 },
+      (_, i) => leftSiblingIndex + i
+    );
+    return [firstPageIndex, "...", ...middleRange, "...", lastPageIndex];
   }
-
-  const range = [];
-  for (let i = 1; i <= totalPages; i++) {
-    range.push(i);
-  }
-  return range;
+  return Array.from({ length: totalPages }, (_, i) => i + 1);
 };
 
 const getTextFromItem = (item) => {
@@ -105,10 +111,11 @@ const getTextFromItem = (item) => {
 
 const getSafeFilename = (item) => {
   const baseFilename = item.filename || "untitled";
-  const cleanName = baseFilename
-    .replace(/\.[^/.]+$/, "")
-    .replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
-  return cleanName || "file";
+  return (
+    baseFilename
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_") || "file"
+  );
 };
 
 const handleCopyText = (item) => {
@@ -127,7 +134,6 @@ const handleDownloadTxt = (item) => {
     toast.error("متنی برای دانلود یافت نشد!");
     return;
   }
-
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -146,32 +152,13 @@ const handleDownloadWord = (item) => {
     toast.error("متنی برای دانلود یافت نشد!");
     return;
   }
-
   const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>${item.filename || "Document"}</title>
-        <style>
-          body { 
-            font-family: 'Times New Roman', serif; 
-            font-size: 12pt; 
-            line-height: 1.6;
-            direction: rtl;
-            text-align: right;
-            margin: 1in;
-          }
-          p { margin-bottom: 1em; }
-        </style>
-      </head>
-      <body>
-        <h1>${item.filename || "متن استخراج شده"}</h1>
-        <p>${text.replace(/\n/g, "</p><p>")}</p>
-      </body>
-    </html>
-  `;
-
+    <!DOCTYPE html><html><head><meta charset="UTF-8"><title>${
+      item.filename || "Document"
+    }</title><style>body{font-family:'Times New Roman',serif;font-size:12pt;direction:rtl;text-align:right;}</style></head><body><p>${text.replace(
+    /\n/g,
+    "</p><p>"
+  )}</p></body></html>`;
   const blob = new Blob([htmlContent], {
     type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   });
@@ -187,58 +174,35 @@ const handleDownloadWord = (item) => {
 };
 
 function Archive() {
-  const [archiveItems, setArchiveItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const {
+    items: archiveItems,
+    status,
+    error,
+  } = useSelector((state) => state.archive);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [openItemId, setOpenItemId] = useState(null);
+  const [textSizes, setTextSizes] = useState({});
   const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchAllArchiveItems = async () => {
-      setLoading(true);
-      try {
-        let allResults = [];
-        let response = await getRequests();
-        if (response.data.results) {
-          allResults = allResults.concat(response.data.results);
-        }
-
-        while (response.data.next) {
-          response = await getRequestsFromUrl(response.data.next);
-          if (response.data.results) {
-            allResults = allResults.concat(response.data.results);
-          }
-        }
-
-        setArchiveItems(allResults);
-      } catch (err) {
-        setError(".Failed to fetch archive items");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAllArchiveItems();
-  }, []);
-
-  const handleDeleteItem = async (itemId) => {
-    const originalItems = [...archiveItems];
-    setArchiveItems((prevItems) =>
-      prevItems.filter((item) => item.id !== itemId)
-    );
-    try {
-      await deleteRequest(itemId);
-      toast.success("آیتم با موفقیت حذف شد!");
-    } catch (err) {
-      toast.error("خطا در حذف آیتم!");
-      setArchiveItems(originalItems);
-      console.error(err);
+    if (status === "idle") {
+      dispatch(fetchArchive());
     }
-  };
+  }, [status, dispatch]);
 
   const handleOpenItem = (itemId) => {
     setOpenItemId((prevOpenId) => (prevOpenId === itemId ? null : itemId));
+  };
+
+  const handleShowTextSize = (item) => {
+    if (textSizes[item.id]) return;
+
+    const text = getTextFromItem(item);
+    const blob = new Blob([text]);
+    const formattedSize = formatBytes(blob.size);
+    setTextSizes((prev) => ({ ...prev, [item.id]: formattedSize }));
   };
 
   const handleNextPage = () => {
@@ -274,13 +238,13 @@ function Archive() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {status === "loading" ? (
               <tr>
                 <td colSpan="6" style={{ direction: "ltr" }}>
                   Loading...
                 </td>
               </tr>
-            ) : error ? (
+            ) : status === "failed" ? (
               <tr>
                 <td colSpan="6" style={{ color: "red" }}>
                   {error}
@@ -289,9 +253,11 @@ function Archive() {
             ) : (
               <TableBody
                 items={currentItems}
-                handleDeleteItem={handleDeleteItem}
-                handleOpenItem={handleOpenItem}
                 openItemId={openItemId}
+                textSizes={textSizes}
+                dispatch={dispatch}
+                handleOpenItem={handleOpenItem}
+                handleShowTextSize={handleShowTextSize}
               />
             )}
           </tbody>
@@ -310,7 +276,14 @@ function Archive() {
 
 export default Archive;
 
-function TableBody({ items, handleDeleteItem, handleOpenItem, openItemId }) {
+function TableBody({
+  items,
+  openItemId,
+  textSizes,
+  dispatch,
+  handleOpenItem,
+  handleShowTextSize,
+}) {
   if (!items || items.length === 0) {
     return (
       <tr>
@@ -320,7 +293,7 @@ function TableBody({ items, handleDeleteItem, handleOpenItem, openItemId }) {
   }
 
   return items.map((item) => {
-    const { Icon, color } = getIconInfo(item);
+    const { Icon, color, type } = getIconInfo(item);
     const isOpen = openItemId === item.id;
 
     return (
@@ -329,7 +302,7 @@ function TableBody({ items, handleDeleteItem, handleOpenItem, openItemId }) {
           <td colSpan="6" style={{ padding: 0 }}>
             <div
               className={`expandable-row-container ${
-                isOpen ? "expanded-row-border" : "collapsed-row-border"
+                isOpen ? `expanded-row-border-${type}` : "collapsed-row-border"
               }`}
             >
               <div
@@ -352,7 +325,9 @@ function TableBody({ items, handleDeleteItem, handleOpenItem, openItemId }) {
                   </a>
                 </div>
                 <div className="row-cell">
-                  {new Date(item.processed).toLocaleDateString("fa-IR")}
+                  {toPersianNumbers(
+                    new Date(item.processed).toLocaleDateString("fa-IR")
+                  )}
                 </div>
                 <div className="row-cell">
                   {(item.filename?.split(".").pop() || "---") + "."}
@@ -366,7 +341,12 @@ function TableBody({ items, handleDeleteItem, handleOpenItem, openItemId }) {
                         e.stopPropagation();
                         handleDownloadTxt(item);
                       }}
-                      title="دانلود فایل متنی"
+                      onMouseEnter={() => handleShowTextSize(item)}
+                      title={
+                        textSizes[item.id]
+                          ? `${textSizes[item.id]}`
+                          : "دانلود فایل متنی"
+                      }
                     >
                       <BsDownload />
                     </span>
@@ -393,7 +373,7 @@ function TableBody({ items, handleDeleteItem, handleOpenItem, openItemId }) {
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteItem(item.id);
+                        dispatch(deleteArchiveItem(item.id));
                       }}
                       className="trash-icon"
                       title="حذف"
@@ -406,10 +386,7 @@ function TableBody({ items, handleDeleteItem, handleOpenItem, openItemId }) {
               {isOpen && (
                 <div className="expanded-content-container">
                   <div className="expanded-content-inner">
-                    <ArchiveResponse
-                      result={item}
-                      onStartOver={() => handleOpenItem(item.id)}
-                    />
+                    <ArchiveResponse result={item} type={type} />
                   </div>
                 </div>
               )}
@@ -458,7 +435,7 @@ function Pagination({
               currentPage === pageNumber ? "selected-option" : ""
             }`}
           >
-            {pageNumber}
+            {toPersianNumbers(pageNumber)}
           </span>
         );
       })}
