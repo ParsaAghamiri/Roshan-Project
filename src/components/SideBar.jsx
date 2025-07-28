@@ -26,7 +26,7 @@ function SideBar() {
         </NavLink>
         <NavLink to="/archive" className="navigate-btn archive">
           <img
-            src="/Assets/icons/archive icon.svg"
+            src="/Assets/icons/archive Icon.svg"
             alt="speech"
             className="navigate-btn__icon"
             width="22"

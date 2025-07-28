@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { BsTextRight } from "react-icons/bs";
 import { BiTimeFive } from "react-icons/bi";
@@ -6,7 +7,8 @@ import { BsDownload } from "react-icons/bs";
 import { RxCopy } from "react-icons/rx";
 import { FiRefreshCw } from "react-icons/fi";
 
-function Response({ result, onStartOver, type }) {
+function Response({ onStartOver, uploadType }) {
+  const { transcript: result, type } = useSelector((state) => state.transcript);
   const [activeTab, setActiveTab] = useState("simple");
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(-1);
   const audioRef = useRef(null);
@@ -208,7 +210,11 @@ function Response({ result, onStartOver, type }) {
           <RxCopy onClick={handleCopy} className="copy-icon" />
           <button
             className={`refresh-btn ${
-              type === "link" ? "red" : type === "upload" ? "blue" : "green"
+              uploadType === "link"
+                ? "red"
+                : uploadType === "upload"
+                ? "blue"
+                : "green"
             }`}
             onClick={onStartOver}
           >

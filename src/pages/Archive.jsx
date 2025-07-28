@@ -213,7 +213,7 @@ function Archive() {
 
         setArchiveItems(allResults);
       } catch (err) {
-        setError("Failed to fetch archive items.");
+        setError(".Failed to fetch archive items");
         console.error(err);
       } finally {
         setLoading(false);
