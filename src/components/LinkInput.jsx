@@ -1,24 +1,16 @@
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { FiLink, FiLoader } from "react-icons/fi";
 import { transcribeUrl } from "../services/api";
-import {
-  setTranscript,
-  setProcessing,
-  setError,
-  setType,
-  clearTranscript,
-} from "../store/slices/transcriptSlice";
 import Response from "./Response";
 
 function LinkInput() {
-  const dispatch = useDispatch();
-  const { transcript, isProcessing } = useSelector((state) => state.transcript);
   const [url, setUrl] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [transcript, setTranscript] = useState(null);
 
   const handleStartOver = () => {
-    dispatch(clearTranscript());
+    setTranscript(null);
   };
 
   const handleSubmit = async () => {
@@ -26,18 +18,17 @@ function LinkInput() {
       toast.error("لطفا یک نشانی اینترنتی معتبر وارد کنید.");
       return;
     }
-    dispatch(setProcessing(true));
-    dispatch(setType("link"));
-    dispatch(clearTranscript());
+    setIsProcessing(true);
+    setTranscript(null);
     try {
       const response = await transcribeUrl(url);
-      dispatch(setTranscript(response.data[0]));
+      setTranscript(response.data[0]);
       toast.success("لینک با موفقیت پیاده‌سازی شد!");
       setUrl("");
-    } catch {
+    } catch (err) {
       toast.error("ارسال لینک با خطا مواجه شد.");
     } finally {
-      dispatch(setProcessing(false));
+      setIsProcessing(false);
     }
   };
 
@@ -45,7 +36,11 @@ function LinkInput() {
     <div className="main-section" id="link-input">
       {transcript ? (
         <div className="response-wrapper">
-          <Response onStartOver={handleStartOver} uploadType="link" />
+          <Response
+            type={"link"}
+            result={transcript}
+            onStartOver={handleStartOver}
+          />
         </div>
       ) : (
         <>

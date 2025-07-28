@@ -697,6 +697,31 @@ thead th:nth-child(6) {
   border-radius: 10px;
 }
 
+.expanded-row-border-voice {
+  border: 1px solid var(--primary-color);
+  border-radius: 10px;
+}
+.expanded-row-border-upload {
+  border: 1px solid var(--primary-blue);
+  border-radius: 10px;
+}
+.expanded-row-border-link {
+  border: 1px solid var(--primary-red);
+  border-radius: 10px;
+}
+
+.highlighted-text-voice {
+  color: var(--primary-color);
+}
+
+.highlighted-text-upload {
+  color: var(--primary-blue);
+}
+
+.highlighted-text-link {
+  color: var(--primary-red);
+}
+
 .main-row-content {
   display: grid;
   grid-template-columns: 5% 40% 13% 13% 13% 15%;

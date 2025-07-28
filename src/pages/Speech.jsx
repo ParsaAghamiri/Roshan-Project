@@ -1,17 +1,15 @@
-import { useSelector, useDispatch } from "react-redux";
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { toggleSelectOpen } from "../store/slices/uiSlice";
 import { PiMicrophone } from "react-icons/pi";
 import { LuCloudUpload } from "react-icons/lu";
 import { FiLink } from "react-icons/fi";
 import { RiArrowDownSFill } from "react-icons/ri";
 
 function Speech() {
-  const dispatch = useDispatch();
-  const selectOpen = useSelector((state) => state.ui.selectOpen);
+  const [selectOpen, setSelectOpen] = useState(false);
 
   function handleSelectOpen() {
-    dispatch(toggleSelectOpen());
+    setSelectOpen(!selectOpen);
   }
 
   return (
@@ -19,7 +17,7 @@ function Speech() {
       <div className="transform-title">
         <h1 className="transform-title__header">تبدیل گفتار به متن</h1>
         <p className="transform-title__text">
-          آوا با استفاده از هزاران ساعت گفتار با صدای افراد مختلف، <br />
+          آوا با استفاده از هزاران ساعت گفتار با صدای افراد مختلف, <br />
           زبان فارسی را یاد گرفته است و می‌تواند متن صحبت‌ها را بنویسد.
         </p>
       </div>
